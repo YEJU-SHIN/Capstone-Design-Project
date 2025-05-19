@@ -10,9 +10,9 @@ function Home() {
          style={{ border: '2px solid #7FA6F8' }}>
         <div>
           <TopBar />
-          <div className="home-banner flex items-center justify-center bg-gray-100">
+          <div className="home-banner flex items-center justify-center bg-white">
             <img
-                src=""
+                src="home_banner.svg"
                 alt="홈화면 배너"
                 className="w-full h-[180px] object-cover"
             />     
