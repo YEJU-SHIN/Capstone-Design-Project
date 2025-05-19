@@ -29,6 +29,10 @@ function MatchingForm() {
     }
   };
 
+  const handleMatchSubmitTest = () =>{ //페이지 이동 테스트 코드드
+    navigate("/matchingwaiting");
+  };
+
   const handleMatchSubmit = async () => {
     const data = {
       schoolType,
@@ -47,7 +51,7 @@ function MatchingForm() {
       });
 
       if (response.ok) {
-        navigate("/matchwaiting");
+        navigate("/matchingwaiting");
       } else {
         alert("매칭 요청 실패");
       }
@@ -82,7 +86,9 @@ function MatchingForm() {
         </div>
       </div>
       <div className="mb-10 w-full flex justify-center">
-        <button className="w-72 h-14 bg-white border border-blue-300 rounded-xl text-blue-700 text-2xl shadow-md hover:bg-blue-50 transition">
+        <button 
+          onClick={handleMatchSubmitTest} //페이지 이동 테스트트
+          className="w-72 h-14 bg-white border border-blue-300 rounded-xl text-blue-700 text-2xl shadow-md hover:bg-blue-50 transition">
           매칭
         </button>
       </div>
