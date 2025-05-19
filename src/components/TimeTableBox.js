@@ -14,10 +14,13 @@ function TimeTableBox({ onTimeChange }) {
         // 실제 API 요청 코드
         // const response = await fetch('https://api.example.com/timetable');
         // const data = await response.json();
-
+        
+        
+        
         // 예시 데이터
         const data = ["08:00", "09:30", "11:00", "13:00"];
         setTimeOptions(data);
+        //예시 데이터 주석처리 해야 위 두줄
       } catch (err) {
         setError("시간표 불러오기 실패");
       } finally {
