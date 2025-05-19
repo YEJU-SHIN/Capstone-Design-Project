@@ -62,38 +62,38 @@ function MatchingForm() {
   };
 
   return (
-    <div className="flex flex-col items-center mt-6">
-      <div className="flex flex-col md:flex-row gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-72 space-y-4">
-          <SelectBox
-            label="등교/하교 선택"
-            options={["등교", "하교"]}
-            onChange={handleSchoolTypeChange}
-          />
-          <SelectBox
-            label="출발지 선택"
-            options={departureOptions}
-            onChange={(e) => setDeparture(e.target.value)}
-          />
-          <SelectBox
-            label="도착지 선택"
-            options={arrivalOptions}
-            onChange={(e) => setArrival(e.target.value)}
-          />
+      <div className="flex flex-col items-center mt-6">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44 space-y-4">
+            <SelectBox
+              label="등교/하교 선택"
+              options={["등교", "하교"]}
+              onChange={handleSchoolTypeChange}
+            />
+            <SelectBox
+              label="출발지 선택"
+              options={departureOptions}
+              onChange={(e) => setDeparture(e.target.value)}
+            />
+            <SelectBox
+              label="도착지 선택"
+              options={arrivalOptions}
+              onChange={(e) => setArrival(e.target.value)}
+            />
+          </div>
+          <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44">
+            <TimeTableBox onTimeChange={setSelectedTime} />
+          </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-72">
-          <TimeTableBox onTimeChange={setSelectedTime} /> {/* props로 상태 전달 */}
+        <div className="mb-10 w-full flex justify-center">
+          <button 
+            onClick={handleMatchSubmitTest}
+            className="w-44 h-12 bg-white border border-blue-300 rounded-xl text-blue-700 text-xl shadow-md hover:bg-blue-50 transition">
+            매칭
+          </button>
         </div>
       </div>
-      <div className="mb-10 w-full flex justify-center">
-        <button 
-          onClick={handleMatchSubmitTest} //페이지 이동 테스트트
-          className="w-72 h-14 bg-white border border-blue-300 rounded-xl text-blue-700 text-2xl shadow-md hover:bg-blue-50 transition">
-          매칭
-        </button>
-      </div>
-    </div>
-  );
+    );
 }
 
 export default MatchingForm;
