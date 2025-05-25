@@ -1,6 +1,30 @@
 import React, { useEffect, useState } from "react";
 import SelectBox from "./SelectBox";
 
+// 매핑 테이블 정의
+// schoolType(등교/하교) 값을 depArrFlag 숫자 값으로 매핑
+const schoolTypeMap = {
+  "등교": 1,
+  "하교": 0
+};
+
+// 경춘선/ITX를 숫자값으로 매핑
+const transitTypeMap = {
+  "경춘선": 0,
+  "ITX": 1
+};
+
+// 학교 내부 위치를 숫자 값으로 매핑
+const locationMap = {
+  "정문": 0,
+  "백록관": 1,
+  "기숙사(새롬관 CU)": 2,
+  "중앙도서관": 3,
+  "미래도서관": 4,
+  "동문": 5,
+  "후문": 6
+};
+
 // 시간표 선택 컴포넌트
 function TimeTableBox({ schoolType, departure, arrival, onTimeChange }) {
   // 시간표 옵션 상태
@@ -19,13 +43,28 @@ function TimeTableBox({ schoolType, departure, arrival, onTimeChange }) {
         return;
       }
 
+      //등교면 depArrFlag = 1, 하교면 0
+      const depArrFlag = schoolTypeMap[schoolType];
+      const isDepartureTransit = schoolType === "등교";
+      const isArrivalTransit = schoolType === "하교";
+
+      // 출발지 ID: 등교면 transitTypeMap, 하교면 locationMap에서 가져옴
+      const departureId = isDepartureTransit
+        ? transitTypeMap[departure]
+        : locationMap[departure];
+
+      // 도착지 ID: 하교면 transitTypeMap, 등교면 locationMap에서 가져옴
+      const arrivalId = isArrivalTransit
+        ? transitTypeMap[arrival]
+        : locationMap[arrival];
+
       try {
         setLoading(true);  // 로딩 시작
         setError(null);    // 이전 에러 초기화
 
         // 백엔드 서버에 GET 요청 → /timetable?schoolType=등교&departure=...&arrival=...
         const response = await fetch(
-          `http://localhost:3001/timetable?schoolType=${schoolType}&departure=${departure}&arrival=${arrival}`
+          `http://localhost:3001/timetable?schoolType=${depArrFlag}&departure=${departureId}&arrival=${arrivalId}`
         );
         const data = await response.json();
 

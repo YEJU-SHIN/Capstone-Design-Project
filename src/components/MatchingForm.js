@@ -3,6 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import SelectBox from './SelectBox';
 import TimeTableBox from './TimeTableBox';
 
+const schoolTypeMap = {
+  "등교": 1,
+  "하교": 0
+};
+
+const transitTypeMap = {
+  "경춘선": 0,
+  "ITX": 1
+};
+
+const locationMap = {
+  "정문": 0,
+  "백록관": 1,
+  "기숙사(새롬관 CU)": 2,
+  "중앙도서관": 3,
+  "미래도서관": 4,
+  "동문": 5,
+  "후문": 6
+};
+
 function MatchingForm() {
   // 상태(state) 선언: 등/하교 선택, 출발지, 도착지, 선택한 시간
   const [schoolType, setSchoolType] = useState("");
@@ -24,11 +44,11 @@ function MatchingForm() {
 
     // 선택한 값에 따라 출발지와 도착지 옵션 설정
     if (selected === "등교") {
-      setDepartureOptions(["남춘천역", "춘천역"]);
-      setArrivalOptions(["정문", "도서관"]);
+      setDepartureOptions(["경춘선", "ITX"]);
+      setArrivalOptions(["정문", "백록관", "기숙사(새롬관 CU)", "중앙도서관", "미래도서관", "동문", "후문"]);
     } else if (selected === "하교") {
-      setDepartureOptions(["정문", "도서관"]);
-      setArrivalOptions(["남춘천역", "춘천역"]);
+      setDepartureOptions(["정문", "백록관", "기숙사(새롬관 CU)", "중앙도서관", "미래도서관", "동문", "후문"]);
+      setArrivalOptions(["경춘선", "ITX"]);
     } else {
       // 잘못된 값일 경우 초기화
       setDepartureOptions([]);
@@ -43,12 +63,24 @@ function MatchingForm() {
 
   // 매칭 버튼 클릭 시 서버로 POST 요청 보내는 함수
   const handleMatchSubmit = async () => {
-    const data = {
-      schoolType,
-      departure,
-      arrival,
-      time: selectedTime,
-    };
+    const depArrFlag = schoolTypeMap[schoolType];
+  const isDepartureTransit = schoolType === "등교"; // 출발지가 경춘선/ITX인지 확인
+  const isArrivalTransit = schoolType === "하교";  // 도착지가 경춘선/ITX인지 확인
+
+  const departureId = isDepartureTransit
+    ? transitTypeMap[departure]
+    : locationMap[departure];
+
+  const arrivalId = isArrivalTransit
+    ? transitTypeMap[arrival]
+    : locationMap[arrival];
+
+  const data = {
+    dep_arr_flag: depArrFlag,
+    departure_id: departureId,
+    arrival_id: arrivalId,
+    time: selectedTime
+  };
 
     try {
       const response = await fetch('http://localhost:3001/match', {
@@ -61,7 +93,7 @@ function MatchingForm() {
 
       // 요청 성공 시 매칭 대기 페이지로 이동
       if (response.ok) {
-        navigate("/matchwaiting");
+        navigate("/matchingwaiting");
       } else {
         alert("매칭 요청 실패");
       }
