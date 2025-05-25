@@ -1,98 +1,97 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import SelectBox from './SelectBox';
-import TimeTableBox from './TimeTableBox';
+import { useNavigate } from 'react-router-dom'; // 페이지 이동을 위한 hook
+import TimeTableBox from './TimeTableBox'; // 시간표 선택 컴포넌트
+import DropdownCheckbox from './DropdownCheckbox'; // 다중 선택 가능한 드롭다운 컴포넌트
 
-const schoolTypeMap = {
-  "등교": 1,
-  "하교": 0
-};
+// 등교/하교 타입 매핑
+const schoolTypeMap = { "등교": 1, "하교": 0 };
 
-const transitTypeMap = {
-  "경춘선": 0,
-  "ITX": 1
-};
+// 교통수단 매핑
+const transitTypeMap = { "경춘선": 0, "ITX": 1 };
 
+// 캠퍼스 내 위치 매핑
 const locationMap = {
-  "정문": 0,
-  "백록관": 1,
-  "기숙사(새롬관 CU)": 2,
-  "중앙도서관": 3,
-  "미래도서관": 4,
-  "동문": 5,
-  "후문": 6
+  "정문": 0, "백록관": 1, "기숙사(새롬관 CU)": 2,
+  "중앙도서관": 3, "미래도서관": 4, "동문": 5, "후문": 6
 };
+
+// 텍스트 배열을 ID 배열로 바꾸는 헬퍼 함수
+const reverseMap = (arr, map) => arr.map(name => map[name]);
 
 function MatchingForm() {
-  // 상태(state) 선언: 등/하교 선택, 출발지, 도착지, 선택한 시간
-  const [schoolType, setSchoolType] = useState("");
-  const [departure, setDeparture] = useState("");
-  const [arrival, setArrival] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  // 상태 변수 선언
+  const [schoolType, setSchoolType] = useState(""); // 등교 or 하교
+  const [departureOptions, setDepartureOptions] = useState([]); // 출발지 옵션
+  const [arrivalOptions, setArrivalOptions] = useState([]); // 도착지 옵션
 
-  // 출발지와 도착지 드롭다운 옵션 상태
-  const [departureOptions, setDepartureOptions] = useState([]);
-  const [arrivalOptions, setArrivalOptions] = useState([]);
+  const [selectedDepartures, setSelectedDepartures] = useState([]); // 선택된 출발지(확정 전)
+  const [selectedArrivals, setSelectedArrivals] = useState([]); // 선택된 도착지(확정 전)
+  const [confirmedDepartures, setConfirmedDepartures] = useState([]); // 확정된 출발지
+  const [confirmedArrivals, setConfirmedArrivals] = useState([]); // 확정된 도착지
 
-  // 페이지 이동용 훅 (React Router)
-  const navigate = useNavigate();
+  const [selectedTime, setSelectedTime] = useState(""); // 선택된 시간
+  const navigate = useNavigate(); // 페이지 이동 함수
 
-  // 등교/하교 선택 시 실행되는 함수
+  // 등교/하교 선택 변경 시 호출
   const handleSchoolTypeChange = (e) => {
     const selected = e.target.value;
-    setSchoolType(selected);
+    setSchoolType(selected); // 등교/하교 상태 설정
+    setSelectedDepartures([]); // 기존 출발지 초기화
+    setSelectedArrivals([]); // 기존 도착지 초기화
+    setConfirmedDepartures([]);
+    setConfirmedArrivals([]);
+    setSelectedTime("");
 
-    // 선택한 값에 따라 출발지와 도착지 옵션 설정
+    // 등교일 경우: 출발지는 경춘선/ITX, 도착지는 학교 위치
     if (selected === "등교") {
       setDepartureOptions(["경춘선", "ITX"]);
-      setArrivalOptions(["정문", "백록관", "기숙사(새롬관 CU)", "중앙도서관", "미래도서관", "동문", "후문"]);
-    } else if (selected === "하교") {
-      setDepartureOptions(["정문", "백록관", "기숙사(새롬관 CU)", "중앙도서관", "미래도서관", "동문", "후문"]);
+      setArrivalOptions(Object.keys(locationMap));
+    }
+    // 하교일 경우: 출발지는 학교 위치, 도착지는 경춘선/ITX
+    else if (selected === "하교") {
+      setDepartureOptions(Object.keys(locationMap));
       setArrivalOptions(["경춘선", "ITX"]);
     } else {
-      // 잘못된 값일 경우 초기화
+      // 초기화 상태
       setDepartureOptions([]);
       setArrivalOptions([]);
     }
-
-    // 이전에 선택했던 값들 초기화
-    setDeparture("");
-    setArrival("");
-    setSelectedTime("");
   };
 
-  // 매칭 버튼 클릭 시 서버로 POST 요청 보내는 함수
+  // 매칭 버튼 클릭 시 서버로 매칭 요청 보내기
   const handleMatchSubmit = async () => {
+    // 모든 항목이 선택되었는지 확인
+    if (!schoolType || confirmedDepartures.length === 0 || confirmedArrivals.length === 0 || !selectedTime) {
+      alert("모든 항목을 선택해주세요.");
+      return;
+    }
+
+    // 등교/하교에 따라 매핑 설정
     const depArrFlag = schoolTypeMap[schoolType];
-  const isDepartureTransit = schoolType === "등교"; // 출발지가 경춘선/ITX인지 확인
-  const isArrivalTransit = schoolType === "하교";  // 도착지가 경춘선/ITX인지 확인
+    const isDepartureTransit = schoolType === "등교";
+    const isArrivalTransit = schoolType === "하교";
 
-  const departureId = isDepartureTransit
-    ? transitTypeMap[departure]
-    : locationMap[departure];
+    // 텍스트 → ID로 변환
+    const departureIds = reverseMap(confirmedDepartures, isDepartureTransit ? transitTypeMap : locationMap);
+    const arrivalIds = reverseMap(confirmedArrivals, isArrivalTransit ? transitTypeMap : locationMap);
 
-  const arrivalId = isArrivalTransit
-    ? transitTypeMap[arrival]
-    : locationMap[arrival];
+    const data = {
+      dep_arr_flag: depArrFlag,
+      departure_ids: departureIds,
+      arrival_ids: arrivalIds,
+      time: selectedTime
+    };
 
-  const data = {
-    dep_arr_flag: depArrFlag,
-    departure_id: departureId,
-    arrival_id: arrivalId,
-    time: selectedTime
-  };
-
+    // 서버로 POST 요청 보내기
     try {
       const response = await fetch('http://localhost:3001/match', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data) // JSON 형식으로 요청 본문 구성
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
 
-      // 요청 성공 시 매칭 대기 페이지로 이동
       if (response.ok) {
+        // 성공 시 대기 화면으로 이동
         navigate("/matchingwaiting");
       } else {
         alert("매칭 요청 실패");
@@ -105,44 +104,55 @@ function MatchingForm() {
 
   return (
     <div className="flex flex-col items-center mt-6">
-      {/* 드롭다운 섹션: 등/하교, 출발지, 도착지 */}
+      {/* 좌측: 선택 폼 / 우측: 시간표 */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44 space-y-4">
-          {/* 등교/하교 선택 박스 */}
-          <SelectBox
-            label="등교/하교 선택"
-            options={["등교", "하교"]}
-            onChange={handleSchoolTypeChange}
-          />
-          {/* 출발지 선택 박스 */}
-          <SelectBox
-            label="출발지 선택"
+        {/* 왼쪽 박스: 등교/하교, 출발지, 도착지 선택 */}
+        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-64 space-y-4">
+          <div>
+            <label className="font-semibold mb-2 block">등교/하교 선택</label>
+            <select
+              value={schoolType}
+              onChange={handleSchoolTypeChange}
+              className="w-full border rounded p-2"
+            >
+              <option value="">선택하세요</option>
+              <option value="등교">등교</option>
+              <option value="하교">하교</option>
+            </select>
+          </div>
+
+          {/* 출발지 드롭다운 */}
+          <DropdownCheckbox
+            label="출발지 선택 (중복 가능)"
             options={departureOptions}
-            value={departure}
-            onChange={(e) => setDeparture(e.target.value)}
+            selectedOptions={selectedDepartures}
+            setSelectedOptions={setSelectedDepartures}
+            onConfirm={() => setConfirmedDepartures([...selectedDepartures])}
           />
-          {/* 도착지 선택 박스 */}
-          <SelectBox
-            label="도착지 선택"
+
+          {/* 도착지 드롭다운 */}
+          <DropdownCheckbox
+            label="도착지 선택 (중복 가능)"
             options={arrivalOptions}
-            value={arrival}
-            onChange={(e) => setArrival(e.target.value)}
+            selectedOptions={selectedArrivals}
+            setSelectedOptions={setSelectedArrivals}
+            onConfirm={() => setConfirmedArrivals([...selectedArrivals])}
           />
         </div>
 
-        {/* 시간표 선택 컴포넌트 */}
-        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44">
+        {/* 오른쪽 박스: 시간표 박스 */}
+        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-64">
           <TimeTableBox
             schoolType={schoolType}
-            departure={departure}
-            arrival={arrival}
+            departureList={confirmedDepartures}
+            arrivalList={confirmedArrivals}
             onTimeChange={setSelectedTime}
           />
         </div>
       </div>
 
       {/* 매칭 버튼 */}
-      <div className="mb-10 w-full flex justify-center">
+      <div className="mb-7 w-full flex justify-center">
         <button
           onClick={handleMatchSubmit}
           className="w-44 h-14 bg-white border border-blue-300 rounded-xl text-blue-700 text-2xl shadow-md hover:bg-blue-50 transition"
@@ -155,5 +165,3 @@ function MatchingForm() {
 }
 
 export default MatchingForm;
-
-
