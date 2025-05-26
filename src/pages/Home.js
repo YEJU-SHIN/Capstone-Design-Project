@@ -20,7 +20,7 @@ function Home() {
           <div>
             <MatchingForm />
           </div>
-          <div className="flex gap-16 justify-center mt-1">
+          <div className="flex gap-16 justify-center mt-12">
               <PageLinkButton 
                 label="채팅" to="/chat" 
                 className="w-24 h-24 rounded-full border border-blue-400 text-blue-700 shadow-md text-lg hover:bg-blue-50 transition"

@@ -107,7 +107,7 @@ function MatchingForm() {
       {/* 좌측: 선택 폼 / 우측: 시간표 */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* 왼쪽 박스: 등교/하교, 출발지, 도착지 선택 */}
-        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-64 space-y-4">
+        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44 space-y-4">
           <div>
             <label className="font-semibold mb-2 block">등교/하교 선택</label>
             <select
@@ -141,7 +141,7 @@ function MatchingForm() {
         </div>
 
         {/* 오른쪽 박스: 시간표 박스 */}
-        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-64">
+        <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44">
           <TimeTableBox
             schoolType={schoolType}
             departureList={confirmedDepartures}

@@ -36,7 +36,7 @@ function DropdownCheckbox({ label, options, selectedOptions, setSelectedOptions,
   return (
     <div className="relative mb-4">
       {/* 라벨 표시 */}
-      <label className="block font-semibold mb-2">{label}</label>
+      <label className="block font-semibold mb-2 text-sm">{label}</label>
 
       {/* 선택된 옵션을 보여주는 버튼 */}
       <button
