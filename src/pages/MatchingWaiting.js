@@ -1,7 +1,15 @@
 import '../App.css';
 import TopBar from "../components/TopBar";
+import { useLocation } from "react-router-dom";
+
+
 
 export default function MatchingWaiting() {
+
+  // 이전 페이지에서 전달된 state 값 가져오기
+  const location = useLocation();
+  const { departure, arrival } = location.state || {}; // fallback 처리도 해줌
+
   return (
     <div className="w-[390px] h-[844px] mx-auto bg-white text-center"
          style={{ border: '2px solid #7FA6F8' }}>
@@ -28,13 +36,13 @@ export default function MatchingWaiting() {
       <div
       className="w-[145px] h-[182px] rounded-xl shadow-md"
       style={{ border: '2px solid #7FA6F8' }}
-      ></div>
+      >{departure || "출발지 없음"}</div>
 
         {/* 목적지 카드 */}
       <div
       className="w-[145px] h-[182px] rounded-xl shadow-md"
       style={{ border: '2px solid #7FA6F8' }}
-      ></div>
+      >{arrival || "목적지 없음"}</div>
       </div>
 
         {/* 매칭 취소 버튼 */}

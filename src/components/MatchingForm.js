@@ -92,7 +92,12 @@ function MatchingForm() {
 
       if (response.ok) {
         // 성공 시 대기 화면으로 이동
-        navigate("/matchingwaiting");
+        navigate("/matchingwaiting", {
+          state: {
+            departure: confirmedDepartures.join(", "),
+            arrival: confirmedArrivals.join(", ")
+          }
+        });
       } else {
         alert("매칭 요청 실패");
       }
