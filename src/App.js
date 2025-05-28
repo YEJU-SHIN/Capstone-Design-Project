@@ -5,6 +5,7 @@ import Chat from './pages/Chat';
 import Report from './pages/Report';
 import MyPage from './pages/MyPage';
 import MatchingWaiting from './pages/MatchingWaiting'; // 매칭 대기 컴포넌트 import
+import Chatlist from './pages/Chatlist'; //채팅목록 컴포넌트 import
 import './App.css';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/report" element={<Report />} />
         <Route path="/matchingwaiting" element={<MatchingWaiting />} /> {/* 추가됨 */}
+        <Route path="/Chatlist" element={<Chatlist />} />  {/* 추가됨 */}
       </Routes>
     </BrowserRouter>
     

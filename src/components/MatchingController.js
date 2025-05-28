@@ -18,7 +18,7 @@ export default function MatchingController() {
         if (data.status === "matched") {
           clearInterval(interval);
           alert("매칭이 완료되었습니다!");
-          navigate("/chat"); // chatroom으로 이동
+          navigate("/chatroom"); // chatroom으로 이동
         }
       } catch (error) {
         console.error("매칭 상태 확인 실패:", error);
