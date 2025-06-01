@@ -23,7 +23,7 @@ function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/report" element={<Report />} />
         <Route path="/matchingwaiting" element={<MatchingWaiting />} /> {/* 추가됨 */}
-        <Route path="/Chatlist" element={<Chatlist />} />  {/* 추가됨 */}
+        <Route path="/chatlist" element={<Chatlist />} />  {/* 추가됨 */}
       </Routes>
     </BrowserRouter>
     
