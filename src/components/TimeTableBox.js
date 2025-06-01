@@ -59,10 +59,15 @@ function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange }) 
         const response = await fetch(`http://localhost:3001/timetable?${params}`);
         const data = await response.json(); // 예시: { "ITX": [...], "경춘선": [...] }
 
-        // 시간표 데이터를 형태 변환 (ex. "ITX - 08:30")
+        // 시간표 데이터를 형태 변환 
         const merged = [];
         Object.entries(data).forEach(([type, times]) => {
-          times.forEach(t => merged.push(`${type} - ${t}`));
+          times.forEach(t => {
+            merged.push({
+              id: t.timetable_id,
+              label: `${type} - ${t.transit_time}`
+            });
+          });
         });
 
         setTimeOptions(merged); // 상태 업데이트
@@ -90,7 +95,9 @@ function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange }) 
       >
         <option value="">-- 시간 선택 --</option>
         {timeOptions.map((t, i) => (
-          <option key={i} value={t}>{t}</option>
+          <option key={i} value={t.id}>
+            {t.label}
+          </option>
         ))}
       </select>
     </div>

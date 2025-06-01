@@ -79,7 +79,7 @@ function MatchingForm() {
       dep_arr_flag: depArrFlag,
       departure_ids: departureIds,
       arrival_ids: arrivalIds,
-      time: selectedTime
+      time_id: parseInt(selectedTime)
     };
 
     // 서버로 POST 요청 보내기
@@ -91,13 +91,33 @@ function MatchingForm() {
       });
 
       if (response.ok) {
-        // 성공 시 대기 화면으로 이동
-        navigate("/matchingwaiting", {
-          state: {
-            departure: confirmedDepartures.join(", "),
-            arrival: confirmedArrivals.join(", ")
-          }
-        });
+        const resData = await response.json();
+        const { status, room_name } = resData;
+        
+        // [수정필요] user_id는 백엔드에서 받아오거나 현재 사용자 로그인 정보에서 설정해야 함
+        const userId = "1234"; // 예시 ID, 실제 로그인 사용자 ID로 교체 필요
+
+        if (status === "matched") {
+          alert("채팅방으로 넘어갑니다.");
+          navigate("/chat", {
+            state: {
+              roomName: room_name,
+              userId: userId 
+            }
+          });
+        } else if (status === "waiting") {
+          // [수정필요] waiting 상태일 경우 WebSocket 연결을 위한 정보도 전달
+          navigate("/matchingwaiting", {
+            state: {
+              departure: confirmedDepartures.join(", "),
+              arrival: confirmedArrivals.join(", "),
+              roomName: room_name,   // WebSocket 주소용
+              userId: userId         // WebSocket 쿼리용
+            }
+          });
+        } else {
+          alert("예상치 못한 서버 응답입니다.");
+        }    
       } else {
         alert("매칭 요청 실패");
       }
