@@ -21,7 +21,7 @@ const reverseMap = (arr, map) => arr.map(name => map[name]);
  * - arrivalList: 도착지 목록 (문자열 배열)
  * - onTimeChange: 선택한 시간 변경 시 호출되는 콜백 함수
  */
-function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange }) {
+function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange, userId }) {
   const [timeOptions, setTimeOptions] = useState([]); // 선택 가능한 시간 목록
   const [loading, setLoading] = useState(false);      // 로딩 상태
   const [error, setError] = useState(null);           // 에러 메시지
@@ -50,13 +50,14 @@ function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange }) 
 
         // URL 파라미터 구성
         const params = new URLSearchParams({
-          schoolType: depArrFlag,
+          dep_arr_flag: depArrFlag,
           departures: departureIds.join(","),
-          arrivals: arrivalIds.join(",")
+          arrivals: arrivalIds.join(","),
+          user_id: userId
         });
 
         // 백엔드에서 시간표 요청
-        const response = await fetch(`http://localhost:3001/timetable?${params}`);
+        const response = await fetch(`http://localhost:8000/main/timeTable?${params}`);
         const data = await response.json(); // 예시: { "ITX": [...], "경춘선": [...] }
 
         // 시간표 데이터를 형태 변환 
@@ -80,7 +81,7 @@ function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange }) 
     };
 
     fetchTimeTable();
-  }, [schoolType, departureList, arrivalList]); // 의존성 배열
+  }, [schoolType, departureList, arrivalList, userId]); // 의존성 배열
 
   // 로딩 또는 에러 상태 처리
   if (loading) return <p>시간표 불러오는 중...</p>;

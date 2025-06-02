@@ -20,6 +20,8 @@ const reverseMap = (arr, map) => arr.map(name => map[name]);
 
 function MatchingForm() {
   // 상태 변수 선언
+  const [userId,setUserId] = useState(""); //임시 userid
+
   const [schoolType, setSchoolType] = useState(""); // 등교 or 하교
   const [departureOptions, setDepartureOptions] = useState([]); // 출발지 옵션
   const [arrivalOptions, setArrivalOptions] = useState([]); // 도착지 옵션
@@ -76,6 +78,7 @@ function MatchingForm() {
     const arrivalIds = reverseMap(confirmedArrivals, isArrivalTransit ? transitTypeMap : locationMap);
 
     const data = {
+      user_id: userId,
       dep_arr_flag: depArrFlag,
       departure_ids: departureIds,
       arrival_ids: arrivalIds,
@@ -84,7 +87,7 @@ function MatchingForm() {
 
     // 서버로 POST 요청 보내기
     try {
-      const response = await fetch('http://localhost:3001/match', {
+      const response = await fetch('http://localhost:8000/main/match-request/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -95,7 +98,7 @@ function MatchingForm() {
         const { status, room_name } = resData;
         
         // [수정필요] user_id는 백엔드에서 받아오거나 현재 사용자 로그인 정보에서 설정해야 함
-        const userId = "1234"; // 예시 ID, 실제 로그인 사용자 ID로 교체 필요
+        const userId = "3"; // 예시 ID, 실제 로그인 사용자 ID로 교체 필요
 
         if (status === "matched") {
           alert("채팅방으로 넘어갑니다.");
@@ -133,6 +136,18 @@ function MatchingForm() {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* 왼쪽 박스: 등교/하교, 출발지, 도착지 선택 */}
         <div className="bg-white rounded-2xl shadow-md border border-blue-200 p-4 w-44 space-y-4">
+
+          <div className="mb-4">
+            <label className="font-semibold mb-2 block">사용자 ID</label>
+            <input
+              type="text"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              className="w-full border rounded p-2"
+              placeholder="아이디를 입력하세요"
+            />
+          </div>
+
           <div>
             <label className="font-semibold mb-2 block">등교/하교 선택</label>
             <select
@@ -172,6 +187,7 @@ function MatchingForm() {
             departureList={confirmedDepartures}
             arrivalList={confirmedArrivals}
             onTimeChange={setSelectedTime}
+            userId={userId}
           />
         </div>
       </div>
