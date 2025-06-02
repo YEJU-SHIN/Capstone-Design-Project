@@ -50,7 +50,7 @@ function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange }) 
 
         // URL 파라미터 구성
         const params = new URLSearchParams({
-          schoolType: depArrFlag,
+          dep_arr_flag: depArrFlag,
           departures: departureIds.join(","),
           arrivals: arrivalIds.join(",")
         });
