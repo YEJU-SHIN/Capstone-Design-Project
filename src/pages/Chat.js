@@ -5,7 +5,7 @@ import TopBar from '../components/TopBar';
 
 // Chat 컴포넌트 시작
 export default function Chat({ senderId, username }) {
-  const { roomId } = useParams();              // URL에서 채팅방 ID 가져오기
+  const { room_name } = useParams();              // URL에서 채팅방 ID 가져오기
   const navigate = useNavigate();              // 페이지 이동용
   const [message, setMessage] = useState('');  // 입력 중인 메시지 상태
   const [messages, setMessages] = useState([]); // 전체 메시지 리스트
@@ -15,13 +15,13 @@ export default function Chat({ senderId, username }) {
   // 처음 렌더링될 때 실행되는 useEffect
   useEffect(() => {
     // 백엔드에서 기존 채팅 기록 불러오기
-    fetch(`http://localhost:8000/api/chat-history/?room_id=${roomId}`)
+    fetch(`http://localhost:8000/api/chat-history/?room_id=${room_name}`)
       .then(res => res.json())
       .then(data => setMessages(data))         // 기존 메시지 리스트에 저장
       .catch(err => console.error('채팅 기록 오류:', err));
 
     // WebSocket 연결 생성
-    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomId}/`);
+    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${room_name}/`);
     chatSocketRef.current = chatSocket;        // 연결 인스턴스를 ref에 저장
 
     // 메시지를 수신했을 때
@@ -44,7 +44,7 @@ export default function Chat({ senderId, username }) {
     return () => {
       chatSocket.close();
     };
-  }, [roomId]); // roomId가 바뀌면 재실행됨
+  }, [room_name]); // roomId가 바뀌면 재실행됨
 
   // 메시지 전송 함수
   const sendMessage = () => {

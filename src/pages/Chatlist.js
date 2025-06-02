@@ -1,39 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopBar from '../components/TopBar';
-import io from 'socket.io-client';
 
-const socket = io('http://localhost:8000'); // 서버 주소 맞게 수정
 
 export default function ChatList({ senderId }) {
   const [chatRooms, setChatRooms] = useState([]);
   const navigate = useNavigate();
+  const wsRef = useRef(null); // WebSocket 인스턴스를 저장
 
-  // 채팅방 리스트를 서버에서 불러오는 함수
-  useEffect(() => {
+  // 서버에서 채팅방 목록을 가져오는 함수
   const fetchChatRooms = () => {
     fetch(`http://localhost:8000/api/chat-rooms/?user_id=${senderId}`)
       .then(res => res.json())
-      .then(data => setChatRooms(data)) // 받아온 데이터를 상태에 저장
+      .then(data => setChatRooms(data))
       .catch(err => console.error("채팅방 불러오기 실패", err));
   };
 
-  // 컴포넌트가 마운트 될 때 채팅방 목록을 처음 불러옴
-  fetchChatRooms();
-
-  // 소켓 서버에 현재 사용자가 채팅 목록에 참여함을 알림
-  socket.emit('joinChatList', { userId: senderId });
-
-  // 서버로부터 'newMessage' 이벤트가 오면 채팅방 목록을 다시 불러옴
-  socket.on('newMessage', () => {
+  useEffect(() => {
+    // 초기 로딩 시 채팅방 목록 가져오기
     fetchChatRooms();
-  });
 
-  // 컴포넌트 언마운트 시 소켓 이벤트 리스너 정리
-  return () => {
-    socket.off('newMessage');
-  };
-}, [senderId]); // senderId가 변경될 때마다 effect 재실행
+    // WebSocket 연결 생성
+    const ws = new WebSocket(`ws://localhost:8000/ws/chatlist/${senderId}/`);
+    wsRef.current = ws;
+
+    ws.onopen = () => {
+      console.log('ChatList WebSocket 연결됨');
+    };
+
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.type === 'new_message') {
+        fetchChatRooms(); // 새 메시지 도착 시 목록 갱신
+      }
+    };
+
+    ws.onerror = (e) => {
+      console.error('WebSocket 오류', e);
+    };
+
+    ws.onclose = () => {
+      console.log('ChatList WebSocket 연결 종료됨');
+    };
+
+    // 컴포넌트 언마운트 시 연결 종료
+    return () => {
+      ws.close();
+    };
+  }, [senderId]); // senderId가 변경될 때마다 effect 재실행
 
   return (
     <div className="w-[390px] h-[844px] mx-auto bg-white" style={{ border: '2px solid #7FA6F8' }}>
