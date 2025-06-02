@@ -55,7 +55,7 @@ export default function Chat({ senderId, username }) {
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
       chatSocket.send(JSON.stringify({
         message: message,                     // 메시지 본문
-        sender: username         // 보낸 사람 이름 또는 ID
+        sender: username         // 보낸 사람 이름
       }));
       setMessage('');                          // 입력창 비우기
     }
@@ -110,7 +110,7 @@ export default function Chat({ senderId, username }) {
       </div>
 
       {/* 메시지 입력창과 전송 버튼 */}
-      <div className="flex p-4 border-t">
+      <div className="flex p-2 border-t">
         <input
           type="text"
           value={message}
