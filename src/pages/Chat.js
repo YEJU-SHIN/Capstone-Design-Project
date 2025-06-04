@@ -4,7 +4,7 @@ import TopBar from '../components/TopBar';
 
 
 // Chat 컴포넌트 시작
-export default function Chat({ senderId, username }) {
+export default function Chat({ username }) {
   const { roomId } = useParams();              // URL에서 채팅방 ID 가져오기
   const navigate = useNavigate();              // 페이지 이동용
   const [message, setMessage] = useState('');  // 입력 중인 메시지 상태
@@ -29,7 +29,7 @@ export default function Chat({ senderId, username }) {
       const data = JSON.parse(e.data);         // 수신한 JSON 문자열을 객체로 파싱
       if (data.message && data.sender) {       // message와 sender 필드가 있다면
         setMessages(prev => [...prev, {
-          senderId: data.sender,               // sender를 senderId로 매핑
+          sender: data.sender,               // sender를 senderId로 매핑
           content: data.message,               // message 본문 저장
         }]);
       }
@@ -99,9 +99,9 @@ export default function Chat({ senderId, username }) {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`mb-2 flex ${msg.senderId === senderId ? 'justify-end' : 'justify-start'}`}
+            className={`mb-2 flex ${msg.sender === username ? 'justify-end' : 'justify-start'}`}
           >
-            <div className={`rounded-xl px-4 py-2 text-sm ${msg.senderId === senderId ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
+            <div className={`rounded-xl px-4 py-2 text-sm ${msg.sender === username ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
               {msg.content}
             </div>
           </div>
