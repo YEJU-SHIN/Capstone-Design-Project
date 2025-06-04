@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // URL 파라미터와 페이지 이동 훅
+import { useLocation , useNavigate } from 'react-router-dom'; // URL 파라미터와 페이지 이동 훅
 import TopBar from '../components/TopBar';
 
 
 // Chat 컴포넌트 시작
-export default function Chat({ senderId, username }) {
-  const { roomId } = useParams();              // URL에서 채팅방 ID 가져오기
+export default function Chat() {
+  //const { roomName } = useParams();              // URL에서 채팅방 ID 가져오기
+  const location = useLocation();
   const navigate = useNavigate();              // 페이지 이동용
+
+  const { roomName, userId } = location.state || {};
+  const senderId = Number(userId) || 0;
   const [message, setMessage] = useState('');  // 입력 중인 메시지 상태
   const [messages, setMessages] = useState([]); // 전체 메시지 리스트
   const messagesEndRef = useRef(null);         // 스크롤 제어용 ref
@@ -14,14 +18,14 @@ export default function Chat({ senderId, username }) {
 
   // 처음 렌더링될 때 실행되는 useEffect
   useEffect(() => {
-    // 백엔드에서 기존 채팅 기록 불러오기
-    fetch(`http://localhost:8000/api/chat-history/?room_id=${roomId}`)
-      .then(res => res.json())
-      .then(data => setMessages(data))         // 기존 메시지 리스트에 저장
-      .catch(err => console.error('채팅 기록 오류:', err));
+    // 백엔드에서 기존 채팅 기록 불러오기(보류)
+    // fetch(`http://localhost:8000/chat/messages_record/?roomName=${roomName}`)
+    //   .then(res => res.json())
+    //   .then(data => setMessages(data))         // 기존 메시지 리스트에 저장
+    //   .catch(err => console.error('채팅 기록 오류:', err));
 
     // WebSocket 연결 생성
-    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomId}/`);
+    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName}/?userId=${senderId}/`);
     chatSocketRef.current = chatSocket;        // 연결 인스턴스를 ref에 저장
 
     // 메시지를 수신했을 때
@@ -29,7 +33,7 @@ export default function Chat({ senderId, username }) {
       const data = JSON.parse(e.data);         // 수신한 JSON 문자열을 객체로 파싱
       if (data.message && data.sender) {       // message와 sender 필드가 있다면
         setMessages(prev => [...prev, {
-          senderId: data.sender,               // sender를 senderId로 매핑
+          senderId: Number(data.sender),               // sender를 senderId로 매핑
           content: data.message,               // message 본문 저장
         }]);
       }
@@ -44,7 +48,7 @@ export default function Chat({ senderId, username }) {
     return () => {
       chatSocket.close();
     };
-  }, [roomId]); // roomId가 바뀌면 재실행됨
+  }, [roomName, senderId]); // roomId가 바뀌면 재실행됨
 
   // 메시지 전송 함수
   const sendMessage = () => {
@@ -55,7 +59,7 @@ export default function Chat({ senderId, username }) {
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
       chatSocket.send(JSON.stringify({
         message: message,                     // 메시지 본문
-        sender: username         // 보낸 사람 이름
+        sender: Number(senderId),         // 보낸 사람 이름
       }));
       setMessage('');                          // 입력창 비우기
     }
@@ -102,7 +106,7 @@ export default function Chat({ senderId, username }) {
             className={`mb-2 flex ${msg.senderId === senderId ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`rounded-xl px-4 py-2 text-sm ${msg.senderId === senderId ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
-              {msg.content}
+              {msg.senderId} : {msg.content} 
             </div>
           </div>
         ))}

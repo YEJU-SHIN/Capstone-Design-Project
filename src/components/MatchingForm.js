@@ -11,8 +11,8 @@ const transitTypeMap = { "경춘선": 0, "ITX": 1 };
 
 // 캠퍼스 내 위치 매핑
 const locationMap = {
-  "정문": 0, "백록관": 1, "기숙사(새롬관 CU)": 2,
-  "중앙도서관": 3, "미래도서관": 4, "동문": 5, "후문": 6
+  "정문": 1, "백록관": 2, "기숙사(새롬관 CU)": 3,
+  "중앙도서관": 8, "미래도서관": 9, "동문": 10, "후문": 11
 };
 
 // 텍스트 배열을 ID 배열로 바꾸는 헬퍼 함수
@@ -98,7 +98,7 @@ function MatchingForm() {
         const { status, room_name } = resData;
         
         // [수정필요] user_id는 백엔드에서 받아오거나 현재 사용자 로그인 정보에서 설정해야 함
-        const userId = "3"; // 예시 ID, 실제 로그인 사용자 ID로 교체 필요
+        //const userId = userId; // 예시 ID, 실제 로그인 사용자 ID로 교체 필요
 
         if (status === "matched") {
           alert("채팅방으로 넘어갑니다.");

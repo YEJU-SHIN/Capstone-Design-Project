@@ -3,10 +3,10 @@ import TopBar from "../components/TopBar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef } from 'react';
 
-export default function MatchingWaiting({ roomName, userId }) {
+export default function MatchingWaiting() {
   const location = useLocation(); // 이전 페이지에서 전달된 state 값 받기
   const navigate = useNavigate(); // 페이지 이동 함수
-  const { departure, arrival } = location.state || {}; // 출발지와 목적지 정보
+  const { roomName, userId, departure, arrival } = location.state || {}; // 출발지와 목적지 정보
 
   const socketRef = useRef(null); // WebSocket 인스턴스를 저장하기 위한 ref
 
@@ -22,6 +22,7 @@ export default function MatchingWaiting({ roomName, userId }) {
     // 서버로부터 메시지를 수신했을 때 실행
     socket.onmessage = (e) => {
       const data = JSON.parse(e.data);
+      console.log("수신한 메시지:", data)
       if (data.status === "matched") {
         alert("매칭이 완료되었습니다! 채팅방으로 이동합니다.");
         // 채팅방으로 이동하며 roomName과 userId 전달
