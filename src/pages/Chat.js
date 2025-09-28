@@ -68,10 +68,17 @@ export default function Chat() {
   // 나가기 버튼 클릭 시 실행
   const handleLeave = () => {
     const chatSocket = chatSocketRef.current;
+    const username = localStorage.getItem("username"); // 💡 sender를 위해 username 가져오기
 
     // 연결이 열려 있으면 'leave' 메시지 보내고 닫기
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-      chatSocket.send(JSON.stringify({ action: 'leave' }));
+      // 1. 'leave' 액션 메시지를 서버로 전송합니다.
+      chatSocket.send(JSON.stringify({ 
+        action: 'leave',
+        sender: username // 누가 나갔는지 알려주기 위해 sender를 포함
+      }));
+
+      // 2. 메시지를 보낸 후 연결을 종료합니다.
       chatSocket.close();
     }
 
