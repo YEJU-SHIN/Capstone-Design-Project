@@ -32,7 +32,7 @@ export default function Chat() {
     chatSocket.onmessage = (e) => {
       const data = JSON.parse(e.data);         // 수신한 JSON 문자열을 객체로 파싱
       if (data.message && data.sender) {       // message와 sender 필드가 있다면
-        setMessages(prev => [...prev, {                                             //f 사용 전
+        setMessages(prev => [...prev, {   
           senderId: Number(data.sender),               // sender를 senderId로 매핑
           content: data.message,               // message 본문 저장
         }]);
@@ -70,7 +70,7 @@ export default function Chat() {
     const chatSocket = chatSocketRef.current;
     const username = localStorage.getItem("username"); // 💡 sender를 위해 username 가져오기
 
-    // 연결이 열려 있으면 'leave' 메시지 보내고 닫기
+    // 연결이 열려 있으면 'leave' 메시지 보내고 닫기                      수정 필요
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
       // 1. 'leave' 액션 메시지를 서버로 전송합니다.
       chatSocket.send(JSON.stringify({ 
