@@ -1,86 +1,118 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import TopBar from '../components/TopBar';
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import TopBar from "../components/TopBar";
 
-
-export default function ChatList({ senderId }) {
-  const [chatRooms, setChatRooms] = useState([]);
+export default function ChatList() {
   const navigate = useNavigate();
-  const wsRef = useRef(null); // WebSocket 인스턴스를 저장
 
-  // 서버에서 채팅방 목록을 가져오는 함수
-  const fetchChatRooms = () => {
-    fetch(`http://localhost:8000/api/chat-rooms/?user_id=${senderId}`)
-      .then(res => res.json())
-      .then(data => setChatRooms(data))
-      .catch(err => console.error("채팅방 불러오기 실패", err));
+  // 1) 마운트 시 한 번만 userId 초기화 (state → URL ?user_id= → localStorage 순)
+  const [userId, setUserId] = useState("");
+  const [chatRoomList, setChatRoomList] = useState([]);
+  const [username, setUsername] = useState(""); // 사용자 이름
+  const usernameRef = useRef("");
+
+  // 사용자 이름 가져오기
+  const fetchUsername = async () => {
+    if (!userId) return null;
+    try {
+      const res = await fetch("http://localhost:8000/main/getUsername/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const name = data.username ?? "아무개";
+        usernameRef.current = name;
+        setUsername(name);
+        return name;
+      } else {
+        console.error("사용자 이름 요청 실패");
+        return null;
+      }
+    } catch (e) {
+      console.error("사용자 이름 요청 오류:", e);
+      return null;
+    }
+  };
+
+  // 채팅방 목록 가져오기
+  const fetchChatRooms = async (uid) => {
+    if (!uid) return;
+    try {
+      const res = await fetch("http://localhost:8000/main/getRoomList/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: uid }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setChatRoomList(data.chatRoomList ?? []);
+      } else {
+        console.error("채팅방 불러오기 실패");
+      }
+    } catch (e) {
+      console.error("채팅방 목록 요청 오류:", e);
+    }
   };
 
   useEffect(() => {
-    // 초기 로딩 시 채팅방 목록 가져오기
-    fetchChatRooms();
+    setUserId(3);
+    fetchChatRooms(userId);  // ← 인자 전달
+    fetchUsername();
+  }, [userId]); // userId가 준비되면 실행
 
-    // WebSocket 연결 생성
-    const ws = new WebSocket(`ws://localhost:8000/ws/chatlist/${senderId}/`);
-    wsRef.current = ws;
+  // 클릭 핸들러: 방 정보로 /chat 이동
+  const enterRoom = (chatRoomId) => {
+    const room = chatRoomList.find((r) => {
+      const rid = r.chatroomId ?? r.roomId ?? r.id;
+      return String(rid) === String(chatRoomId);
+    });
+    if (!room) return;
 
-    ws.onopen = () => {
-      console.log('ChatList WebSocket 연결됨');
-    };
+    const roomName = room.roomName ?? room.roomName ?? "채팅방";
 
-    ws.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-      if (data.type === 'new_message') {
-        fetchChatRooms(); // 새 메시지 도착 시 목록 갱신
-      }
-    };
-
-    ws.onerror = (e) => {
-      console.error('WebSocket 오류', e);
-    };
-
-    ws.onclose = () => {
-      console.log('ChatList WebSocket 연결 종료됨');
-    };
-
-    // 컴포넌트 언마운트 시 연결 종료
-    return () => {
-      ws.close();
-    };
-  }, [senderId]); // senderId가 변경될 때마다 effect 재실행
+    navigate("/chat", {
+      state: {
+        roomName: roomName,
+        userId: userId,          // 현재 사용자 id
+        username: usernameRef.current || username || "아무개",
+      },
+    });
+  };
 
   return (
-    <div className="w-[390px] h-[844px] mx-auto bg-white" style={{ border: '2px solid #7FA6F8' }}>
+    <div
+      className="w-[390px] h-[844px] mx-auto bg-white"
+      style={{ border: "2px solid #7FA6F8" }}
+    >
       <TopBar />
-
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">채팅 목록</h2>
 
-        {/* 채팅방이 없을 경우 안내 메시지 */}
-        {chatRooms.length === 0 ? (
+        {chatRoomList.length === 0 ? (
           <p className="text-gray-500">진행 중인 채팅이 없습니다.</p>
         ) : (
-          chatRooms.map((room) => (
-            <div
-              key={room.roomId}
-              className="border-b py-3 cursor-pointer hover:bg-gray-100"
-              onClick={() => navigate(`/chatroom/${room.roomId}`)}
-            >
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">{room.partnerName}</span>
-                <span className="text-xs text-gray-400">
-                  {/* 마지막 메시지 시간 표시 */}
-                  {new Date(room.lastMessageTime).toLocaleTimeString()}
-                </span>
-              </div>
-              <div className="text-sm text-gray-600 truncate">
-                {/* 마지막 메시지 내용 요약 */}
-                {room.lastMessage}
-              </div>
-            </div>
-          ))
+          <ul className="space-y-2">
+            {chatRoomList.map((room) => {
+              const chatRoomId = room.chatroomId ?? room.roomId ?? room.id;
+              const roomName = room.chatroomName ?? room.roomName ?? "채팅방";
+              return (
+                <li key={chatRoomId}>
+                  <button
+                    className="w-full text-left px-3 py-2 rounded-md hover:bg-gray-100 font-semibold"
+                    onClick={() => enterRoom(chatRoomId)}
+                    title={roomName}
+                  >
+                    {roomName}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </div>
   );
 }
+// 채팅방 목록이 비어있을 때 "진행 중인 채팅이 없습니다." 메시지 표시
