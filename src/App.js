@@ -21,6 +21,7 @@ function App() {
         <Route path= "/mypage" element={<MyPage />} />
 
         <Route path="/chat" element={<Chat />} />
+        <Route path="/chatlist" element={<Chatlist />} />
         <Route path="/report" element={<Report />} />
         <Route path="/matchingwaiting" element={<MatchingWaiting />} /> {/* 추가됨 */}
         <Route path="/chatlist" element={<Chatlist />} />  {/* 추가됨 */}

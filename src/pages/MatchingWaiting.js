@@ -1,7 +1,7 @@
 import '../App.css';
 import TopBar from "../components/TopBar";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState} from 'react';
 
 export default function MatchingWaiting() {
   const location = useLocation(); // 이전 페이지에서 전달된 state 값 받기
@@ -9,25 +9,59 @@ export default function MatchingWaiting() {
   const { roomName, userId, departure, arrival } = location.state || {}; // 출발지와 목적지 정보
 
   const socketRef = useRef(null); // WebSocket 인스턴스를 저장하기 위한 ref
+  const [username, setUsername] = useState(''); // 사용자 이름
+  const usernameRef = useRef('');
+
+  const fetchUsername = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/main/getUsername/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const name = data.username ?? '아무개';
+        usernameRef.current = name;   // ★ ref 먼저 갱신
+        setUsername(name);            //    state도 갱신
+        return name;
+      } else {
+        console.error('사용자 이름 요청 실패');
+        return null;
+      }
+    } catch (e) {
+      console.error('사용자 이름 요청 오류:', e);
+      return null;
+    }
+  };
+
+  // username 상태가 바뀔 때마다 usernameRef도 업데이트
+  useEffect(() => { usernameRef.current = username; }, [username]);
 
   // 컴포넌트가 마운트될 때 실행
   useEffect(() => {
     // roomName과 userId가 없으면 실행하지 않음
     if (!roomName || !userId) return;
 
+    fetchUsername();
+
     // 백엔드 WebSocket 서버에 연결
     const socket = new WebSocket(`ws://localhost:8000/ws/wait/${roomName}/`);
     socketRef.current = socket; // 참조값 저장
 
     // 서버로부터 메시지를 수신했을 때 실행
-    socket.onmessage = (e) => {
+    socket.onmessage = async(e) => {
       const data = JSON.parse(e.data);
       console.log("수신한 메시지:", data)
       if (data.status === "matched") {
         alert("매칭이 완료되었습니다! 채팅방으로 이동합니다.");
+        if (!usernameRef.current) {
+          const fetched = await fetchUsername();
+          if (fetched) usernameRef.current = fetched;
+        }
         // 채팅방으로 이동하며 roomName과 userId 전달
         navigate("/chat", {
-          state: { roomName, userId }
+          state: { roomName, userId, username : usernameRef.current }
         });
       }
     };

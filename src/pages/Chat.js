@@ -9,8 +9,9 @@ export default function Chat() {
   const location = useLocation();
   const navigate = useNavigate();              // 페이지 이동용
 
-  const { roomName, userId } = location.state || {};
+  const { roomName, userId , username} = location.state || {};
   const senderId = Number(userId) || 0;
+  const senderUsername = username || '아무개';
   const [message, setMessage] = useState('');  // 입력 중인 메시지 상태
   const [messages, setMessages] = useState([]); // 전체 메시지 리스트
   const messagesEndRef = useRef(null);         // 스크롤 제어용 ref
@@ -25,15 +26,16 @@ export default function Chat() {
     //   .catch(err => console.error('채팅 기록 오류:', err));
 
     // WebSocket 연결 생성
-    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName}/?userId=${senderId}/`);
+    const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName}/?userId=${senderId}&username=${senderUsername}`);
     chatSocketRef.current = chatSocket;        // 연결 인스턴스를 ref에 저장
 
     // 메시지를 수신했을 때
     chatSocket.onmessage = (e) => {
       const data = JSON.parse(e.data);         // 수신한 JSON 문자열을 객체로 파싱
-      if (data.message && data.sender) {       // message와 sender 필드가 있다면
+      if ('message' in data) {       // message와 sender 필드가 있다면
         setMessages(prev => [...prev, {
-          senderId: Number(data.sender),               // sender를 senderId로 매핑
+          senderId: data.senderId ?? null,               // sender를 sender id로 매핑
+          senderUsername: data.senderUsername ?? '아무개',           // sender 이름 저장
           content: data.message,               // message 본문 저장
         }]);
       }
@@ -59,7 +61,8 @@ export default function Chat() {
     if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
       chatSocket.send(JSON.stringify({
         message: message,                     // 메시지 본문
-        sender: Number(senderId),         // 보낸 사람 이름
+        senderId: Number(senderId),         // 보낸 사람 이름
+        senderUsername : senderUsername,         // 보낸 사람 이름
       }));
       setMessage('');                          // 입력창 비우기
     }
@@ -106,7 +109,7 @@ export default function Chat() {
             className={`mb-2 flex ${msg.senderId === senderId ? 'justify-end' : 'justify-start'}`}
           >
             <div className={`rounded-xl px-4 py-2 text-sm ${msg.senderId === senderId ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
-              {msg.senderId} : {msg.content} 
+              {msg.senderUsername} : {msg.content} 
             </div>
           </div>
         ))}

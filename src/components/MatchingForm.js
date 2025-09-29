@@ -34,6 +34,8 @@ function MatchingForm() {
   const [selectedTime, setSelectedTime] = useState(""); // 선택된 시간
   const navigate = useNavigate(); // 페이지 이동 함수
 
+  const [username, setUsername] = useState(''); // 사용자 이름
+
   // 등교/하교 선택 변경 시 호출
   const handleSchoolTypeChange = (e) => {
     const selected = e.target.value;
@@ -87,6 +89,22 @@ function MatchingForm() {
 
     // 서버로 POST 요청 보내기
     try {
+
+      let resolvedUsername = username;  // 현재 state 백업
+
+      const res = await fetch('http://localhost:8000/main/getUsername/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId }),
+      });
+      if(res.ok){
+        const data = await res.json();
+        resolvedUsername = data.username ?? '아무개'; // ★ 지역 변수에 담기
+        setUsername(resolvedUsername);               // 상태도 갱신(표시용)
+      } else {
+        console.error('사용자 이름 요청 실패');
+      }
+
       const response = await fetch('http://localhost:8000/main/match-request/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,7 +123,8 @@ function MatchingForm() {
           navigate("/chat", {
             state: {
               roomName: room_name,
-              userId: userId 
+              userId: userId ,
+              username : resolvedUsername
             }
           });
         } else if (status === "waiting") {
