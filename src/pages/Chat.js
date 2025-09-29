@@ -32,7 +32,7 @@ export default function Chat() {
     chatSocket.onmessage = (e) => {
       const data = JSON.parse(e.data);         // 수신한 JSON 문자열을 객체로 파싱
       if (data.message && data.sender) {       // message와 sender 필드가 있다면
-        setMessages(prev => [...prev, {
+        setMessages(prev => [...prev, {                                             //f 사용 전
           senderId: Number(data.sender),               // sender를 senderId로 매핑
           content: data.message,               // message 본문 저장
         }]);
