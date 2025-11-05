@@ -45,6 +45,8 @@ export default function MatchingWaiting() {
 
     fetchUsername();
 
+    console.log("username",username)
+
     // 백엔드 WebSocket 서버에 연결
     const socket = new WebSocket(`ws://localhost:8000/ws/wait/${roomName}/`);
     socketRef.current = socket; // 참조값 저장
@@ -53,6 +55,7 @@ export default function MatchingWaiting() {
     socket.onmessage = async(e) => {
       const data = JSON.parse(e.data);
       console.log("수신한 메시지:", data)
+
       if (data.status === "matched") {
         alert("매칭이 완료되었습니다! 채팅방으로 이동합니다.");
         if (!usernameRef.current) {

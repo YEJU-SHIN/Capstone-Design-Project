@@ -57,7 +57,7 @@ export default function ChatList() {
   };
 
   useEffect(() => {
-    setUserId(3);
+    setUserId(4);
     fetchChatRooms(userId);  // ← 인자 전달
     fetchUsername();
   }, [userId]); // userId가 준비되면 실행
