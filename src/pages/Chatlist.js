@@ -15,7 +15,7 @@ export default function ChatList() {
   const fetchUsername = async () => {
     if (!userId) return null;
     try {
-      const res = await fetch("http://localhost:8000/main/getUsername/", {
+      const res = await fetch("http://192.168.0.57:8000/main/getUsername/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: userId }),
@@ -40,7 +40,7 @@ export default function ChatList() {
   const fetchChatRooms = async (uid) => {
     if (!uid) return;
     try {
-      const res = await fetch("http://localhost:8000/main/getRoomList/", {
+      const res = await fetch("http://192.168.0.57:8000/main/getRoomList/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user_id: uid }),

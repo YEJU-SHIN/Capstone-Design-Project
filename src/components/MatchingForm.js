@@ -92,7 +92,7 @@ function MatchingForm() {
 
       let resolvedUsername = username;  // 현재 state 백업
 
-      const res = await fetch('http://localhost:8000/main/getUsername/', {
+      const res = await fetch('http://192.168.0.57:8000/main/getUsername/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId }),
@@ -105,7 +105,7 @@ function MatchingForm() {
         console.error('사용자 이름 요청 실패');
       }
 
-      const response = await fetch('http://localhost:8000/main/match-request/', {
+      const response = await fetch('http://192.168.0.57:8000/main/match-request/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

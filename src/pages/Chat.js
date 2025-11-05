@@ -30,7 +30,7 @@ export default function Chat() {
       setIsLoading(false); // 데이터 로딩이 완료
 
       //과거 기록을 모두 불러온 후에 웹소켓 연결
-      const chatSocket = new WebSocket(`ws://localhost:8000/ws/chat/${roomName}/?userId=${senderId}&username=${senderUsername}`);
+      const chatSocket = new WebSocket(`ws://192.168.0.57:8000/ws/chat/${roomName}/?userId=${senderId}&username=${senderUsername}`);
       chatSocketRef.current = chatSocket;
 
       // 메시지를 수신했을 때의 로직
@@ -96,7 +96,7 @@ export default function Chat() {
 
   async function fetchMessages(roomName) {
     try {
-      const res = await fetch('http://localhost:8000/main/getMessagesRecord/', {
+      const res = await fetch('http://192.168.0.57:8000/main/getMessagesRecord/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ room_name: roomName }),
