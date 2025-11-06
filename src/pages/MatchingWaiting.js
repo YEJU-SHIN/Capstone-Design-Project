@@ -14,7 +14,7 @@ export default function MatchingWaiting() {
 
   const fetchUsername = async () => {
     try {
-      const res = await fetch('http://192.168.0.57:8000/main/getUsername/', {
+      const res = await fetch('http://114.70.124.15:8000/main/getUsername/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId }),
@@ -48,7 +48,7 @@ export default function MatchingWaiting() {
     console.log("username",username)
 
     // 백엔드 WebSocket 서버에 연결
-    const socket = new WebSocket(`ws://192.168.0.57:8000/ws/wait/${roomName}/`);
+    const socket = new WebSocket(`ws://114.70.124.15:8000/ws/wait/${roomName}/`);
     socketRef.current = socket; // 참조값 저장
 
     // 서버로부터 메시지를 수신했을 때 실행
