@@ -57,7 +57,7 @@ function TimeTableBox({ schoolType, departureList, arrivalList, onTimeChange, us
         });
 
         // 백엔드에서 시간표 요청
-        const response = await fetch(`http://114.70.124.15:8000/main/timeTable?${params}`);
+        const response = await fetch(`http://192.168.0.57:8000/main/timeTable?${params}`);
         const data = await response.json(); // 예시: { "ITX": [...], "경춘선": [...] }
 
         // 시간표 데이터를 형태 변환 
